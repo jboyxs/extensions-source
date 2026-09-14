@@ -8,18 +8,24 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import keiyoushi.annotation.Source
 import keiyoushi.network.get
+import keiyoushi.network.rateLimit
 import keiyoushi.source.KeiSource
 import keiyoushi.utils.asJsoup
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import kotlin.time.Duration.Companion.seconds
 
 @Source
 abstract class Dogemanga : KeiSource() {
 
+    override fun OkHttpClient.Builder.configureClient() = rateLimit(1, 2.seconds)
+
     override fun Headers.Builder.configureHeaders() = apply {
+        removeAll("Origin")
         set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
         set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
         set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
