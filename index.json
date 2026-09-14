@@ -1,7 +1,7 @@
 {
   "name": "Jboyxs Extensions",
   "badgeLabel": "JBX",
-  "signingKey": "e6d31b6fc6ec176cd0710d4fe6a14cea8e1fbbbdd31d17ac4c86be4e6930ae97",
+  "signingKey": "6b5162b3a1fa37e11259fdc682b845f478ae70c0d87d44e581b83cb36999d563",
   "contact": {
     "website": "https://keiyoushi.github.io",
     "discord": "https://discord.gg/3FbCpdKbdY"
@@ -12,9 +12,9 @@
         "name": "DogeManga",
         "packageName": "eu.kanade.tachiyomi.extension.zh.dogemanga",
         "resources": {
-          "apkUrl": "https://github.com/jboyxs/extensions-source/releases/download/abc7915/tachiyomi-zh.dogemanga-v1.6.1.apk",
+          "apkUrl": "https://github.com/jboyxs/extensions-source/releases/download/df810fa/tachiyomi-zh.dogemanga-v1.6.1.apk",
           "iconUrl": "https://cdn.jsdelivr.net/gh/jboyxs/extensions-source@main/src/zh/dogemanga/res/mipmap-xhdpi/ic_launcher.png",
-          "jarUrl": "https://github.com/jboyxs/extensions-source/releases/download/abc7915/tachiyomi-zh.dogemanga-v1.6.1.jar"
+          "jarUrl": "https://github.com/jboyxs/extensions-source/releases/download/df810fa/tachiyomi-zh.dogemanga-v1.6.1.jar"
         },
         "extensionLib": "1.6",
         "versionCode": "106001",
