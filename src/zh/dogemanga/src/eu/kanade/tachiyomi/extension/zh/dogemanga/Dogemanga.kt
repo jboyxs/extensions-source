@@ -12,17 +12,18 @@ import keiyoushi.source.KeiSource
 import keiyoushi.utils.asJsoup
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Headers
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 @Source
 abstract class Dogemanga : KeiSource() {
 
-    override fun headersBuilder() = super.headersBuilder()
-        .set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
-        .set("Referer", "$baseUrl/")
-        .set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-        .set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+    override fun Headers.Builder.configureHeaders() = apply {
+        set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
+        set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+    }
 
     override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(parseMangaCards(client.get(baseUrl).asJsoup()), false)
 
