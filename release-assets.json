@@ -1,0 +1,12 @@
+{
+  "eu.kanade.tachiyomi.extension.zh.dogemanga": {
+    "apk": {
+      "name": "tachiyomi-zh.dogemanga-v1.6.1.apk",
+      "sha256": "98faed19c8d5beaf5363bf3aac13455b5eca3b94aff1c542ded77900fe820a7d"
+    },
+    "jar": {
+      "name": "tachiyomi-zh.dogemanga-v1.6.1.jar",
+      "sha256": "8fbee5569a7f105381a17d5440f2bfc958479dd48356f5fcc7f52a3ff88f8b46"
+    }
+  }
+}
