@@ -24,6 +24,9 @@ env:
   ICON_BASE_URL: https://cdn.jsdelivr.net/gh/${{ github.repository }}@main
   INDEX_NAME: Jboyxs Extensions
   BADGE_LABEL: JBX
+  DEFAULT_ALIAS: upload
+  DEFAULT_KEY_STORE_PASSWORD: android
+  DEFAULT_KEY_PASSWORD: android
 
 jobs:
   build:
@@ -45,25 +48,48 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
-      - name: Validate signing secrets
-        run: |
-          test -n "${{ secrets.SIGNING_KEY }}"
-          test -n "${{ secrets.ALIAS }}"
-          test -n "${{ secrets.KEY_STORE_PASSWORD }}"
-          test -n "${{ secrets.KEY_PASSWORD }}"
-          test -n "${{ secrets.SIGNING_KEY_FINGERPRINT }}"
-
       - name: Prepare signing key
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS || env.DEFAULT_ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || env.DEFAULT_KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || env.DEFAULT_KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > signingkey.jks
+          if [ -n "$SIGNING_KEY" ]; then
+            echo "$SIGNING_KEY" | base64 -d > signingkey.jks
+          else
+            keytool -genkeypair \
+              -v \
+              -keystore signingkey.jks \
+              -storepass "$KEY_STORE_PASSWORD" \
+              -alias "$ALIAS" \
+              -keypass "$KEY_PASSWORD" \
+              -keyalg RSA \
+              -keysize 4096 \
+              -validity 10000 \
+              -dname "CN=${GITHUB_REPOSITORY}, OU=GitHub Actions, O=Jboyxs, L=Unknown, ST=Unknown, C=US"
+          fi
+
+          keytool -list -v \
+            -keystore signingkey.jks \
+            -storepass "$KEY_STORE_PASSWORD" \
+            -alias "$ALIAS" |
+            awk '/SHA256:/ { gsub(":", "", $2); print tolower($2) }' > signing-key-fingerprint.txt
 
       - name: Build extension
         env:
-          ALIAS: ${{ secrets.ALIAS }}
-          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS || env.DEFAULT_ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD || env.DEFAULT_KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || env.DEFAULT_KEY_PASSWORD }}
         run: |
           ./gradlew "${MODULE}:assembleRelease"
+
+      - name: Upload signing fingerprint
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: signing-key-fingerprint
+          path: signing-key-fingerprint.txt
+          retention-days: 1
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -86,6 +112,11 @@ jobs:
         with:
           path: ~/apk-artifacts
 
+      - name: Read signing fingerprint
+        run: |
+          fingerprint="$(cat ~/apk-artifacts/signing-key-fingerprint/signing-key-fingerprint.txt)"
+          echo "SIGNING_KEY_FINGERPRINT=$fingerprint" >> "$GITHUB_ENV"
+
       - name: Checkout main branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -96,7 +127,6 @@ jobs:
       - name: Checkout or initialize repo branch
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          SIGNING_KEY_FINGERPRINT: ${{ secrets.SIGNING_KEY_FINGERPRINT }}
         run: |
           mkdir repo
           cd repo
@@ -117,7 +147,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
-          SIGNING_KEY_FINGERPRINT: ${{ secrets.SIGNING_KEY_FINGERPRINT }}
         run: |
           cd repo
           pip install protobuf
