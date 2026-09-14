@@ -18,9 +18,7 @@ import org.jsoup.nodes.Element
 @Source
 abstract class Dogemanga : KeiSource() {
 
-    override suspend fun getPopularManga(page: Int): MangasPage {
-        return MangasPage(parseMangaCards(client.get(baseUrl).asJsoup()), false)
-    }
+    override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(parseMangaCards(client.get(baseUrl).asJsoup()), false)
 
     override suspend fun getLatestUpdates(page: Int): MangasPage {
         val url = if (page == 1) {
@@ -48,8 +46,7 @@ abstract class Dogemanga : KeiSource() {
         return MangasPage(mangas, document.selectFirst("a.btn[href*=_search], a.btn[href*=o=], a.btn[href*=p=]") != null)
     }
 
-    private fun parseMangaCards(document: Document): List<SManga> =
-        document.select(".site-card").mapNotNull { it.toSManga() }
+    private fun parseMangaCards(document: Document): List<SManga> = document.select(".site-card").mapNotNull { it.toSManga() }
 
     private fun Element.toSManga(): SManga? {
         val link = selectFirst("a.site-card__manga-title, a[href*=/m/]")
@@ -108,15 +105,14 @@ abstract class Dogemanga : KeiSource() {
         }
     }
 
-    private fun Document.parseChapters(): List<SChapter> =
-        select(".site-manga-thumbnail__link[href*=/p/]").map { element ->
-            SChapter.create().apply {
-                name = element.selectFirst(".text-center")?.text()
-                    ?: element.selectFirst("img")?.attr("alt")
-                    ?: error("Missing chapter name")
-                url = element.attr("abs:href").toRelativeUrl()
-            }
+    private fun Document.parseChapters(): List<SChapter> = select(".site-manga-thumbnail__link[href*=/p/]").map { element ->
+        SChapter.create().apply {
+            name = element.selectFirst(".text-center")?.text()
+                ?: element.selectFirst("img")?.attr("alt")
+                ?: error("Missing chapter name")
+            url = element.attr("abs:href").toRelativeUrl()
         }
+    }
 
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         val document = client.get(getChapterUrl(chapter)).asJsoup()
