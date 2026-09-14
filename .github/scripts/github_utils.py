@@ -1,7 +1,8 @@
 import subprocess
 import time
+import os
 
-REPO_NAME = "keiyoushi/extensions"
+REPO_NAME = os.environ.get("REPO_NAME", "keiyoushi/extensions")
 RETRY_ATTEMPTS = 4
 RETRY_BASE_DELAY = 60
 

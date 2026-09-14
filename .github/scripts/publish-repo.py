@@ -3,6 +3,7 @@ import hashlib
 import html
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -18,7 +19,10 @@ ARTIFACTS_DIR = Path.home() / "apk-artifacts"
 # The checked-out `repo` branch we publish into (the working directory).
 REPO_DIR = Path.cwd()
 
-ICON_BASE_URL = "https://cdn.jsdelivr.net/gh/keiyoushi/extensions-source@main"
+ICON_BASE_URL = os.environ.get(
+    "ICON_BASE_URL",
+    "https://cdn.jsdelivr.net/gh/keiyoushi/extensions-source@main",
+)
 RELEASE_BASE_URL = f"https://github.com/{REPO_NAME}/releases/download"
 ASSET_LIMIT = 495  # Actual limit is 1000 but we upload 2 items per extension.
 UPLOAD_CHUNK_SIZE = 80
@@ -183,9 +187,12 @@ final_extensions.extend(ext for ext, _, _, _, _ in new_extensions)
 final_extensions.sort(key=lambda ext: ext.packageName)
 
 index = index_pb2.Index(
-    name="Keiyoushi",
-    badgeLabel="KEI",
-    signingKey="9add655a78e96c4ec7a53ef89dccb557cb5d767489fac5e785d671a5a75d4da2",
+    name=os.environ.get("INDEX_NAME", "Keiyoushi"),
+    badgeLabel=os.environ.get("BADGE_LABEL", "KEI"),
+    signingKey=os.environ.get(
+        "SIGNING_KEY_FINGERPRINT",
+        "9add655a78e96c4ec7a53ef89dccb557cb5d767489fac5e785d671a5a75d4da2",
+    ),
     contact=index_pb2.Contact(
         website="https://keiyoushi.github.io",
         discord="https://discord.gg/3FbCpdKbdY",
